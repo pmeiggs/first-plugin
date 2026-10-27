@@ -1,0 +1,7 @@
+name: first-plugin
+version: '${version}'
+
+main: io.github.pmeiggs.firstPlugin.FirstPlugin
+api-version: '26.3'
+load: POSTWORLD
+description: "test plugoin for event server"
