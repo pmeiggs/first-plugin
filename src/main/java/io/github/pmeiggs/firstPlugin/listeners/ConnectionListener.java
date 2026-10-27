@@ -12,10 +12,8 @@ public class ConnectionListener implements Listener{
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-
         event.joinMessage(Component.text(
-                "HI we're making a plugin for events and stuff that you'd like to see on the server.")
+                "Hi we're making a plugin for events and stuff that you'd like to see on the server.")
                 .color(NamedTextColor.GRAY)
                 .append(Component.text(" Please vote for what you'd prefer on the polls on Discord, many thanks!")
                         .decorate(TextDecoration.BOLD)));
