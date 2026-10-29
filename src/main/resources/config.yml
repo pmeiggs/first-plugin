@@ -1,0 +1,8 @@
+
+
+pvpEnabled: true
+crystalPvpEnabled: false
+
+messages:
+  join-prefix: "Hi we're making a plugin for events and stuff that you'd like to see on the server."
+  join-suffix: " Please vote for what you'd prefer on the polls on Discord, many thanks!"
