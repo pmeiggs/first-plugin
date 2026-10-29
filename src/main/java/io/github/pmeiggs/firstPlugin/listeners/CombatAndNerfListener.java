@@ -21,7 +21,6 @@ public class CombatAndNerfListener implements Listener {
     private final long COMBAT_COOLDOWN_MS = 10000; // 10 seconds combat block
 
     @EventHandler
-    @EventHandler
     public void onDamage(EntityDamageByEntityEvent event) {
         // 1. Combat tagging for players
         if (event.getEntity() instanceof Player victim && event.getDamager() instanceof Player attacker) {
