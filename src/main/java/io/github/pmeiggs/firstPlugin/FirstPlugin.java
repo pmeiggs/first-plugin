@@ -1,6 +1,7 @@
 package io.github.pmeiggs.firstPlugin;
 
 import io.github.pmeiggs.firstPlugin.listeners.ConnectionListener;
+import io.github.pmeiggs.firstPlugin.listeners.CrystalListener;
 import io.github.pmeiggs.firstPlugin.listeners.CombatAndNerfListener;
 import io.github.pmeiggs.firstPlugin.listeners.ItemAndWorldNerfListener;
 
@@ -16,6 +17,8 @@ public final class FirstPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ConnectionListener(), this);
         getServer().getPluginManager().registerEvents(new CombatAndNerfListener(), this);
         getServer().getPluginManager().registerEvents(new ItemAndWorldNerfListener(), this);
+        getServer().getPluginManager().registerEvents(new CrystalListener(), this);
+        //hide locator bar
     }
 
     @Override
