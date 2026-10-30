@@ -28,6 +28,10 @@ public class PluginConfig{
         return plugin.getConfig().getBoolean("netheriteSmithingEnabled");
     }
 
+    public void setNetheriteSmithingEnabled(boolean enabled){
+        plugin.getConfig().set("netheriteSmithingEnabled", enabled);
+    }
+
     public String getJoinMessagePrefix() {
         return plugin.getConfig().getString("messages.join-prefix");
     }
