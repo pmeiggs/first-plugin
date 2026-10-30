@@ -1,7 +1,6 @@
 package io.github.pmeiggs.firstPlugin;
 
 import io.github.pmeiggs.config.PluginConfig;
-import io.github.pmeiggs.firstPlugin.listeners.NetheriteListener;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -42,6 +41,8 @@ class NetheriteListenerTest {
         MockBukkit.unmock();
     }
 
+
+    //tests if netherite gear can be smithed when netheriteSmithing is allowed and disallowed within the config
     @Test
     void netheriteSmithingEventsAreBlockedWhenDisabled() {
         
