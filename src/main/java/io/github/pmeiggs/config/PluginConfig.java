@@ -24,6 +24,10 @@ public class PluginConfig{
         return plugin.getConfig().getBoolean("crystalPvpEnabled");
     }
 
+    public boolean isNetheriteSmithingEnabled(){
+        return plugin.getConfig().getBoolean("netheriteSmithingEnabled");
+    }
+
     public String getJoinMessagePrefix() {
         return plugin.getConfig().getString("messages.join-prefix");
     }
