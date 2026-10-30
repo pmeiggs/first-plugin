@@ -1,7 +1,7 @@
 
 
 pvpEnabled: true
-crystalPvpEnabled: false
+crystalPvpEnabled: true
 
 messages:
   join-prefix: "Hi we're making a plugin for events and stuff that you'd like to see on the server."

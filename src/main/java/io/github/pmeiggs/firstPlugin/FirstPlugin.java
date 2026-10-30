@@ -18,7 +18,11 @@ public final class FirstPlugin extends JavaPlugin {
         // Plugin startup logic
         IO.println("[pm] Plugin Started properly");
         getServer().getPluginManager().registerEvents(new ConnectionListener(pluginConfig), this);
-        getServer().getPluginManager().registerEvents(new CrystalListener(), this);
+
+        //if crystal pvp is disabled
+        if (!pluginConfig.isCrystalPvpEnabled()) {
+            getServer().getPluginManager().registerEvents(new CrystalListener(), this);
+        }
         //hide locator bar
     }
 
