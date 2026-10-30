@@ -3,6 +3,7 @@ package io.github.pmeiggs.firstPlugin;
 import io.github.pmeiggs.config.PluginConfig;
 import io.github.pmeiggs.firstPlugin.listeners.ConnectionListener;
 import io.github.pmeiggs.firstPlugin.listeners.CrystalListener;
+import io.github.pmeiggs.firstPlugin.listeners.NetheriteListener;
 import io.github.pmeiggs.firstPlugin.listeners.WorldNerfListener;
 import io.github.pmeiggs.firstPlugin.listeners.CombatListener;
 
@@ -28,6 +29,9 @@ public final class FirstPlugin extends JavaPlugin {
         //if crystal pvp is disabled registerListener 
         if(!pluginConfig.isCrystalPvpEnabled()){
             getServer().getPluginManager().registerEvents(new CrystalListener(), this);
+        }
+        if(!pluginConfig.isNetheriteSmithingEnabled()){
+            getServer().getPluginManager().registerEvents(new NetheriteListener(), this);
         }
         
         //hide locator bar
