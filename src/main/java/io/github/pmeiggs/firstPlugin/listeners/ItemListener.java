@@ -5,53 +5,41 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemHeldEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-public class ItemAndWorldNerfListener implements Listener {
+public class ItemListener implements Listener {
 
-    // 1. Limit Protection to 3 & Netherite usage blocks on Armor, Swords, Axes
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
         ItemStack cursor = event.getCursor();
         ItemStack current = event.getCurrentItem();
 
-        // Check protection level cap (Prot 3)[cite: 2]
+        // Check protection level cap (Prot 3)
         checkAndFixProtection(cursor);
         checkAndFixProtection(current);
 
-        // Disable Netherite on Armor, Swords, and Axes[cite: 2]
+        // Check and cap Sharpness level on weapons (Sharpness <= 3)
+        checkAndFixSharpness(cursor);
+        checkAndFixSharpness(current);
+
+        // Disable Netherite on Armor, Swords, and Axes
         if (isRestrictedNetheriteItem(cursor) || isRestrictedNetheriteItem(current)) {
             event.setCancelled(true);
             player.sendMessage("§cNetherite is disabled for armor, swords, and axes!");
         }
 
-        // Totem Inventory Limit (Max 1 allowed, no restocking from inventory)[cite: 2]
+        // Totem Inventory Limit (Max 1 allowed)
         enforceTotemLimit(event, player);
 
-        // Mace Unstorable Check (Cannot put Mace into chests/shulkers/hoppers)[cite: 2]
+        // Mace Unstorable Check (Cannot put Mace into chests/containers)
         if (isMace(cursor) || isMace(current)) {
-            if (event.getView().getTitle().contains("Chest") || 
-                event.getView().getTitle().contains("Container") || 
-                event.getView().getTitle().contains("Shulker") ||
-                event.getClickedInventory() != player.getInventory()) {
-                // If trying to move out of player inventory into a storage block
-                if (event.getClickedInventory() != player.getInventory()) {
-                    event.setCancelled(true);
-                    player.sendMessage("§cThe Mace is unstorable and cannot be placed in containers!");
-                }
+            if (event.getClickedInventory() != null && event.getClickedInventory() != player.getInventory()) {
+                event.setCancelled(true);
+                player.sendMessage("§cThe Mace is unstorable and cannot be placed in containers!");
             }
         }
     }
@@ -63,6 +51,32 @@ public class ItemAndWorldNerfListener implements Listener {
                 event.setCancelled(true);
                 return;
             }
+        }
+    }
+
+    @EventHandler
+    public void onDamageItemNerfs(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player player) {
+            //double check sharpness level is 3 and not higher during combat 
+            ItemStack weapon = player.getInventory().getItemInMainHand();
+            checkAndFixSharpness(weapon);
+
+            // Limit Mace damage to 8 hearts (16 damage points) & make unbreakable
+            if (weapon.getType() == Material.MACE) {
+                if (event.getFinalDamage() > 16.0) {
+                    event.setDamage(16.0);
+                }
+                var meta = weapon.getItemMeta();
+                if (meta != null && !meta.isUnbreakable()) {
+                    meta.setUnbreakable(true);
+                    weapon.setItemMeta(meta);
+                }
+            }
+        }
+
+        // Limit Cart damage to 10 hearts (20 damage points)
+        if (event.getDamager().getType().name().contains("MINECART") && event.getFinalDamage() > 20.0) {
+            event.setDamage(20.0);
         }
     }
 
@@ -84,11 +98,20 @@ public class ItemAndWorldNerfListener implements Listener {
         }
     }
 
+    private void checkAndFixSharpness(ItemStack item) {
+        if (item != null && item.containsEnchantment(Enchantment.SHARPNESS)) {
+            if (item.getEnchantmentLevel(Enchantment.SHARPNESS) > 3) {
+                item.removeEnchantment(Enchantment.SHARPNESS);
+                item.addEnchantment(Enchantment.SHARPNESS, 3);
+            }
+        }
+    }
+
     private boolean isMace(ItemStack item) {
         return item != null && item.getType() == Material.MACE;
     }
 
-    // Enforce only ONE totem allowed in the entire player inventory[cite: 2]
+    //bugged code icl, will look at it later, but for now, this is the best way to enforce the totem limit
     private void enforceTotemLimit(InventoryClickEvent event, Player player) {
         ItemStack cursor = event.getCursor();
         ItemStack current = event.getCurrentItem();
@@ -106,33 +129,6 @@ public class ItemAndWorldNerfListener implements Listener {
             if (totemCount >= 1) {
                 event.setCancelled(true);
                 player.sendMessage("§cYou can only have 1 Totem of Undying in your inventory at a time!");
-            }
-        }
-    }
-
-    // 2. Disable Bed and Respawn Anchor explosion damage/effects[cite: 2]
-    @EventHandler
-    public void onExplosion(EntityDamageEvent event) {
-        if (event.getCause() == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION || 
-            event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION) {
-            // Check if context is bed/anchor (simplified by canceling explosion damage if in dimension mismatch context)
-            if (event.getEntity() instanceof Player player) {
-                if (player.getWorld().getEnvironment() == org.bukkit.World.Environment.NETHER && 
-                    event.getCause() == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION) {
-                    event.setCancelled(true);
-                }
-            }
-        }
-    }
-
-    // 3. Double Breeze Rod Drops[cite: 2]
-    @EventHandler
-    public void onEntityDeath(EntityDeathEvent event) {
-        if (event.getEntityType().name().equals("BREEZE")) {
-            for (ItemStack drop : event.getDrops()) {
-                if (drop.getType() == Material.BREEZE_ROD) {
-                    drop.setAmount(drop.getAmount() * 2);
-                }
             }
         }
     }
