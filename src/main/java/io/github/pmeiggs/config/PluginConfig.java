@@ -16,8 +16,12 @@ public class PluginConfig{
         plugin.saveDefaultConfig();
     }
 
-    public boolean isPvPEnabled(){
+    public boolean isPvpEnabled(){
         return plugin.getConfig().getBoolean("pvpEnabled");
+    }
+
+    public boolean isCrystalPvpEnabled(){
+        return plugin.getConfig().getBoolean("crystalPvpEnabled");
     }
 
     public String getJoinMessagePrefix() {
