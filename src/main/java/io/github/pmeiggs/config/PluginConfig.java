@@ -24,6 +24,10 @@ public class PluginConfig{
         return plugin.getConfig().getBoolean("crystalPvpEnabled");
     }
 
+    public void setCrystalPvpEnabled(boolean enabled){
+        plugin.getConfig().set("crystalPvpEnabled", enabled);
+    }
+
     public boolean isNetheriteSmithingEnabled(){
         return plugin.getConfig().getBoolean("netheriteSmithingEnabled");
     }
