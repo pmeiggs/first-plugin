@@ -36,6 +36,10 @@ public class PluginConfig{
         plugin.getConfig().set("netheriteSmithingEnabled", enabled);
     }
 
+    public boolean isTunnelingEnabled() {
+        return plugin.getConfig().getBoolean("custom-enchantments.tunneling.enabled", true);
+    }
+
     public String getJoinMessagePrefix() {
         return plugin.getConfig().getString("messages.join-prefix");
     }

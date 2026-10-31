@@ -1,5 +1,6 @@
 package io.github.pmeiggs.firstPlugin.listeners;
 
+import io.github.pmeiggs.config.PluginConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -12,8 +13,17 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
 public class CrystalListener implements Listener {
 
+    private final PluginConfig pluginConfig;
+
+    public CrystalListener(PluginConfig pluginConfig) {
+        this.pluginConfig = pluginConfig;
+    }
+
     @EventHandler
     public void onCrystalHit(EntityDamageByEntityEvent event) {
+        if (pluginConfig.isCrystalPvpEnabled()) {
+            return;
+        }
 
         if (!(event.getEntity() instanceof EnderCrystal)) {
             return;
