@@ -31,11 +31,7 @@ public class FirstPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new WorldNerfListener(), this);
         getServer().getPluginManager().registerEvents(new ConnectionListener(pluginConfig), this);
 
-        Enchantment tunneling = Registry.ENCHANTMENT.get(TunnelingListener.getEnchantmentKey());
-        if (tunneling == null) {
-            getLogger().warning("Datapack enchantment fockysenchants:tunneling was not loaded; tunneling will be inactive.");
-        }
-        getServer().getPluginManager().registerEvents(new TunnelingListener(this, tunneling), this);
+       
 
         getServer().getPluginManager().registerEvents(new CrystalListener(pluginConfig), this);
         getServer().getPluginManager().registerEvents(new NetheriteListener(pluginConfig), this);
@@ -46,6 +42,20 @@ public class FirstPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PvpDamageListener(pvpToggle), this);
 
         //hide locator bar
+
+        loadCustomEnchants();
+        
+    }
+
+
+    public void loadCustomEnchants(){
+
+        Enchantment tunneling = Registry.ENCHANTMENT.get(TunnelingListener.getEnchantmentKey());
+        if (tunneling == null) {
+            getLogger().warning("Datapack enchantment fockysenchants:tunneling was not loaded; tunneling will be inactive.");
+        }
+        getServer().getPluginManager().registerEvents(new TunnelingListener(this, pluginConfig, tunneling), this);
+
     }
 
     @Override

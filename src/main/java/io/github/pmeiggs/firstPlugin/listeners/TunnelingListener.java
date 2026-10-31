@@ -1,5 +1,6 @@
 package io.github.pmeiggs.firstPlugin.listeners;
 
+import io.github.pmeiggs.config.PluginConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Material;
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class TunnelingListener implements Listener {
 
     private final JavaPlugin plugin;
+    private final PluginConfig pluginConfig;
     private final Enchantment tunneling;
     private final Set<UUID> playersBreakingTunnelBlocks = new HashSet<>();
     private static final Set<Material> TUNNELABLE_BLOCKS = EnumSet.of(
@@ -31,15 +33,17 @@ public class TunnelingListener implements Listener {
             Material.DEEPSLATE
     );
 
-    public TunnelingListener(JavaPlugin plugin, Enchantment tunneling) {
+    public TunnelingListener(JavaPlugin plugin, PluginConfig pluginConfig, Enchantment tunneling) {
         this.plugin = plugin;
+        this.pluginConfig = pluginConfig;
         this.tunneling = tunneling;
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
-        if (playersBreakingTunnelBlocks.contains(player.getUniqueId())) {
+        if (!pluginConfig.isTunnelingEnabled()
+                || playersBreakingTunnelBlocks.contains(player.getUniqueId())) {
             return;
         }
 
@@ -56,7 +60,7 @@ public class TunnelingListener implements Listener {
     }
 
     private void breakTunnel(Player player, Block origin, int dominantAxis) {
-        if (!player.isOnline()) {
+        if (!pluginConfig.isTunnelingEnabled() || !player.isOnline()) {
             return;
         }
 
