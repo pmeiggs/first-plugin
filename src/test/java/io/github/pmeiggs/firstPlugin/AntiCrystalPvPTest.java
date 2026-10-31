@@ -80,9 +80,6 @@ public class AntiCrystalPvPTest {
 
     private void setCPvPEnabled(FirstPlugin plugin, PluginConfig pluginConfig, boolean enabled){
         pluginConfig.setCrystalPvpEnabled(enabled);
-        plugin.saveConfig();
-        plugin.getServer().getPluginManager().disablePlugin(plugin);
-        plugin.getServer().getPluginManager().enablePlugin(plugin);
     }
 
 

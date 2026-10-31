@@ -27,6 +27,12 @@ tasks {
         // Your plugin's jar (or shadowJar if present) will be used automatically.
         minecraftVersion("26.3")
         jvmArgs("-Xms2G", "-Xmx2G", "-Dcom.mojang.eula.agree=true")
+        doFirst {
+            copy {
+                from(layout.projectDirectory.dir("datapacks/fockysEnchants"))
+                into(layout.projectDirectory.dir("run/world/datapacks/fockysEnchants"))
+            }
+        }
     }
 
     processResources {

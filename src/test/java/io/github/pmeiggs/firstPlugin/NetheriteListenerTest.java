@@ -82,9 +82,6 @@ class NetheriteListenerTest {
 
     private void setNetheriteSmithingEnabled(FirstPlugin plugin, PluginConfig pluginConfig, boolean enabled) {
         pluginConfig.setNetheriteSmithingEnabled(enabled);
-        plugin.saveConfig();
-        plugin.getServer().getPluginManager().disablePlugin(plugin);
-        plugin.getServer().getPluginManager().enablePlugin(plugin);
     }
 
 }

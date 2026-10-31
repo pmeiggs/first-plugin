@@ -8,7 +8,10 @@ import io.github.pmeiggs.firstPlugin.listeners.NetheriteListener;
 import io.github.pmeiggs.firstPlugin.listeners.WorldNerfListener;
 import io.github.pmeiggs.firstPlugin.listeners.CombatListener;
 import io.github.pmeiggs.firstPlugin.listeners.PvpDamageListener;
+import io.github.pmeiggs.firstPlugin.listeners.TunnelingListener;
 
+import org.bukkit.Registry;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class FirstPlugin extends JavaPlugin {
@@ -28,13 +31,14 @@ public class FirstPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new WorldNerfListener(), this);
         getServer().getPluginManager().registerEvents(new ConnectionListener(pluginConfig), this);
 
-        //if crystal pvp is disabled registerListener 
-        if(!pluginConfig.isCrystalPvpEnabled()){
-            getServer().getPluginManager().registerEvents(new CrystalListener(), this);
+        Enchantment tunneling = Registry.ENCHANTMENT.get(TunnelingListener.getEnchantmentKey());
+        if (tunneling == null) {
+            getLogger().warning("Datapack enchantment fockysenchants:tunneling was not loaded; tunneling will be inactive.");
         }
-        if(!pluginConfig.isNetheriteSmithingEnabled()){
-            getServer().getPluginManager().registerEvents(new NetheriteListener(), this);
-        }
+        getServer().getPluginManager().registerEvents(new TunnelingListener(this, tunneling), this);
+
+        getServer().getPluginManager().registerEvents(new CrystalListener(pluginConfig), this);
+        getServer().getPluginManager().registerEvents(new NetheriteListener(pluginConfig), this);
 
         //register pvp toggle command
         PvpToggle pvpToggle = new PvpToggle(this);
