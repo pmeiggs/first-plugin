@@ -1,8 +1,10 @@
 package io.github.pmeiggs.firstPlugin;
 
 import io.github.pmeiggs.config.PluginConfig;
+import io.github.pmeiggs.firstPlugin.commands.PvpToggle;
 import io.github.pmeiggs.firstPlugin.listeners.ConnectionListener;
 import io.github.pmeiggs.firstPlugin.listeners.CrystalListener;
+import io.github.pmeiggs.firstPlugin.listeners.PvpDamageListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class FirstPlugin extends JavaPlugin {
@@ -23,7 +25,11 @@ public final class FirstPlugin extends JavaPlugin {
         if(!pluginConfig.isCrystalPvpEnabled()){
             getServer().getPluginManager().registerEvents(new CrystalListener(), this);
         }
-        
+        //pvp toggle command
+        PvpToggle pvpToggle = new PvpToggle(this);
+        registerCommand("togglepvp", pvpToggle);
+        getServer().getPluginManager().registerEvents(new PvpDamageListener(pvpToggle), this);
+
         //hide locator bar
     }
 
