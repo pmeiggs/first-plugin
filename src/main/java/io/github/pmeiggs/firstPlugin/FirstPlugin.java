@@ -9,7 +9,7 @@ import io.github.pmeiggs.firstPlugin.listeners.CombatListener;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class FirstPlugin extends JavaPlugin {
+public class FirstPlugin extends JavaPlugin {
 
     private PluginConfig pluginConfig;
 
