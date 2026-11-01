@@ -1,6 +1,7 @@
 package io.github.pmeiggs.firstPlugin.listeners;
 
 import io.github.pmeiggs.firstPlugin.commands.PvpToggle;
+import io.github.pmeiggs.firstPlugin.combat.CombatTagTracker;
 import org.bukkit.Material;
 import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
@@ -29,16 +30,22 @@ import java.util.UUID;
 
 public class CombatListener implements Listener {
 
-    private final HashMap<UUID, Long> combatTags = new HashMap<>();
-    private final long COMBAT_COOLDOWN_MS = 15000; // 15 seconds combat block, increased 10 -> 15s
+    private final long combatCooldownMs; // Default 15 seconds; configurable in config.yml.
     private final HashMap<UUID, TextColor> previousUsernameColour = new HashMap<>();
     private final HashMap<UUID, Component> previousPlayerListName = new HashMap<>();
     private final JavaPlugin plugin;
     private final PvpToggle pvpToggle;
+    private final CombatTagTracker combatTagTracker;
 
     public CombatListener(JavaPlugin plugin, PvpToggle pvpToggle) {
+        this(plugin, pvpToggle, new CombatTagTracker());
+    }
+
+    public CombatListener(JavaPlugin plugin, PvpToggle pvpToggle, CombatTagTracker combatTagTracker) {
         this.plugin = plugin;
         this.pvpToggle = pvpToggle;
+        this.combatTagTracker = combatTagTracker;
+        this.combatCooldownMs = combatTagTracker.getCombatCooldownMs();
     }
 
     private void tagPlayer(Player player, long now) {
@@ -53,16 +60,16 @@ public class CombatListener implements Listener {
         player.playerListName((tabName == null
                 ? Component.text(player.getName())
                 : tabName).color(NamedTextColor.RED));
-        combatTags.put(playerId, now);
+        combatTagTracker.tag(player, now);
 
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            if (!Long.valueOf(now).equals(combatTags.get(playerId))) {
+            if (!combatTagTracker.isCurrentTag(playerId, now)) {
                 return;
             }
 
-            combatTags.remove(playerId);
+            combatTagTracker.remove(playerId);
             restoreUsernameColour(playerId);
-        }, COMBAT_COOLDOWN_MS / 50);
+        }, (combatCooldownMs + 49) / 50);
     }
 
     private void restoreUsernameColour(UUID playerId) {
@@ -82,7 +89,7 @@ public class CombatListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         UUID playerId = event.getPlayer().getUniqueId();
-        combatTags.remove(playerId);
+        combatTagTracker.remove(playerId);
         restoreUsernameColour(playerId);
 
         Player player = event.getPlayer();
@@ -186,7 +193,6 @@ public class CombatListener implements Listener {
 
     //new method to verify if combat tagged
     public boolean isCombatTagged(Player player) {
-        return combatTags.containsKey(player.getUniqueId()) &&
-                (System.currentTimeMillis() - combatTags.get(player.getUniqueId()) < COMBAT_COOLDOWN_MS);
+        return combatTagTracker.isCombatTagged(player);
     }
 }
