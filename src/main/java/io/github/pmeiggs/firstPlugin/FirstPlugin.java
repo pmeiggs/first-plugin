@@ -27,7 +27,7 @@ public class FirstPlugin extends JavaPlugin {
         // Plugin startup logic
         IO.println("[pm] Plugin Started properly");
 
-        getServer().getPluginManager().registerEvents(new CombatListener(), this);
+        getServer().getPluginManager().registerEvents(new CombatListener(this), this);
         getServer().getPluginManager().registerEvents(new WorldNerfListener(), this);
         getServer().getPluginManager().registerEvents(new ConnectionListener(pluginConfig), this);
 
