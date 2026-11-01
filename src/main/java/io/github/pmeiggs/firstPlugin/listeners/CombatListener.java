@@ -131,7 +131,7 @@ public class CombatListener implements Listener {
         ItemStack item = event.getItem();
 
         if (item == null) return;
-        if (event.getAction().name().contains("RIGHT")) {
+        if (!(event.getAction().name().contains("RIGHT"))) {
             return;
         }
         // Disable Enchanted GApples while having combat on
