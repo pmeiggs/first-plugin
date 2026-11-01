@@ -15,19 +15,18 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.block.BlockFace;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.MockBukkit;
-import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -69,7 +68,7 @@ class CombatListenerTest {
         assertEquals(NamedTextColor.RED, victim.displayName().color());
         assertEquals(NamedTextColor.RED, victim.playerListName().color());
 
-        MockBukkit.getMock().getScheduler().performTicks(199);
+        MockBukkit.getMock().getScheduler().performTicks(299);
         assertEquals(NamedTextColor.RED, attacker.displayName().color());
 
         MockBukkit.getMock().getScheduler().performOneTick();
@@ -92,12 +91,15 @@ class CombatListenerTest {
         MockBukkit.getMock().getScheduler().performTicks(100);
         assertEquals(NamedTextColor.RED, attacker.displayName().color());
 
-        MockBukkit.getMock().getScheduler().performTicks(100);
+        MockBukkit.getMock().getScheduler().performTicks(199);
+        assertEquals(NamedTextColor.RED, attacker.displayName().color());
+
+        MockBukkit.getMock().getScheduler().performOneTick();
         assertEquals(NamedTextColor.BLUE, attacker.displayName().color());
     }
 
     @Test
-    void projectileDamageTagsBothPlayersAndDisablesPunchKnockback() {
+    void projectileDamageTagsBothPlayersAndBlocksPunchBow() {
         Player attacker = MockBukkit.getMock().addPlayer();
         Player victim = MockBukkit.getMock().addPlayer();
         ItemStack bow = new ItemStack(Material.BOW);
@@ -112,9 +114,10 @@ class CombatListenerTest {
 
         assertEquals(NamedTextColor.RED, attacker.displayName().color());
         assertEquals(NamedTextColor.RED, victim.displayName().color());
-        assertEquals("Punch enchantment is disabled in combat!",
-                PlainTextComponentSerializer.plainText().serialize(
-                        ((PlayerMock) attacker).nextComponentMessage()));
+
+        EntityShootBowEvent bowShoot = new EntityShootBowEvent(attacker, bow, arrow, 1);
+        plugin.getServer().getPluginManager().callEvent(bowShoot);
+        assertTrue(bowShoot.isCancelled());
     }
 
     @Test
@@ -131,14 +134,14 @@ class CombatListenerTest {
     }
 
     @Test
-    void goldenApplesAreBlockedOnlyOnRightClickDuringCombat() {
+    void enchantedGoldenApplesAreBlockedOnlyOnRightClickWhilePvpIsEnabled() {
         Player attacker = MockBukkit.getMock().addPlayer();
         Player victim = MockBukkit.getMock().addPlayer();
         damage(attacker, victim);
 
-        assertTrue(interactionIsDenied(interact(victim, Material.GOLDEN_APPLE, Action.RIGHT_CLICK_AIR)));
+        assertFalse(interactionIsDenied(interact(victim, Material.GOLDEN_APPLE, Action.RIGHT_CLICK_AIR)));
         assertTrue(interactionIsDenied(interact(victim, Material.ENCHANTED_GOLDEN_APPLE, Action.RIGHT_CLICK_BLOCK)));
-        assertFalse(interactionIsDenied(interact(victim, Material.GOLDEN_APPLE, Action.LEFT_CLICK_AIR)));
+        assertFalse(interactionIsDenied(interact(victim, Material.ENCHANTED_GOLDEN_APPLE, Action.LEFT_CLICK_AIR)));
     }
 
     @Test
@@ -171,13 +174,14 @@ class CombatListenerTest {
         damage(attacker, victim);
         victim.setGliding(true);
 
-        PlayerToggleFlightEvent combatFlight = new PlayerToggleFlightEvent(victim, true);
-        plugin.getServer().getPluginManager().callEvent(combatFlight);
-        assertTrue(combatFlight.isCancelled());
+        EntityToggleGlideEvent combatGlide = new EntityToggleGlideEvent(victim, true);
+        plugin.getServer().getPluginManager().callEvent(combatGlide);
+        assertTrue(combatGlide.isCancelled());
 
-        PlayerToggleFlightEvent groundedFlight = new PlayerToggleFlightEvent(attacker, true);
-        plugin.getServer().getPluginManager().callEvent(groundedFlight);
-        assertFalse(groundedFlight.isCancelled());
+        Player untaggedPlayer = MockBukkit.getMock().addPlayer();
+        EntityToggleGlideEvent untaggedGlide = new EntityToggleGlideEvent(untaggedPlayer, true);
+        plugin.getServer().getPluginManager().callEvent(untaggedGlide);
+        assertFalse(untaggedGlide.isCancelled());
     }
 
     @Test

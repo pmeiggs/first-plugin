@@ -3,6 +3,7 @@ package io.github.pmeiggs.firstPlugin;
 import io.github.pmeiggs.config.PluginConfig;
 import io.github.pmeiggs.firstPlugin.commands.HealCommand;
 import io.github.pmeiggs.firstPlugin.commands.PvpToggle;
+import io.github.pmeiggs.firstPlugin.combat.CombatTagTracker;
 import io.github.pmeiggs.firstPlugin.commands.shortcuts.GamemodeCommands;
 import io.github.pmeiggs.firstPlugin.listeners.ConnectionListener;
 import io.github.pmeiggs.firstPlugin.listeners.CrystalListener;
@@ -31,7 +32,9 @@ public class FirstPlugin extends JavaPlugin {
         // Plugin startup logic
         IO.println("[pm] Plugin Started properly");
 
-        getServer().getPluginManager().registerEvents(new CombatListener(this, new PvpToggle(this)), this);
+        CombatTagTracker combatTagTracker = new CombatTagTracker(pluginConfig);
+        PvpToggle pvpToggle = new PvpToggle(this, combatTagTracker);
+        getServer().getPluginManager().registerEvents(new CombatListener(this, pvpToggle, combatTagTracker), this);
         getServer().getPluginManager().registerEvents(new WorldNerfListener(), this);
         getServer().getPluginManager().registerEvents(new ConnectionListener(pluginConfig), this);
 
@@ -41,7 +44,6 @@ public class FirstPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new NetheriteListener(pluginConfig), this);
 
         //register pvp toggle command
-        PvpToggle pvpToggle = new PvpToggle(this);
         registerCommand("togglepvp", pvpToggle);
         getServer().getPluginManager().registerEvents(new PvpDamageListener(pvpToggle), this);
 

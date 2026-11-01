@@ -6,6 +6,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 //handles the config
 
 public class PluginConfig{
+    public static final long DEFAULT_COMBAT_COOLDOWN_MS = 15000;
+
     private JavaPlugin plugin;
 
     public PluginConfig(JavaPlugin plugin){
@@ -18,6 +20,10 @@ public class PluginConfig{
 
     public boolean isPvpEnabled(){
         return plugin.getConfig().getBoolean("pvpEnabled");
+    }
+
+    public long getCombatCooldownMs() {
+        return plugin.getConfig().getLong("combatCooldownMs", DEFAULT_COMBAT_COOLDOWN_MS);
     }
 
     public boolean isCrystalPvpEnabled(){

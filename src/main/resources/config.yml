@@ -1,6 +1,7 @@
 
 
 pvpEnabled: true
+combatCooldownMs: 15000
 crystalPvpEnabled: false
 netheriteSmithingEnabled: false
 
