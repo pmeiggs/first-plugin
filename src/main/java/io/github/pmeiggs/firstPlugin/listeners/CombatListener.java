@@ -1,5 +1,6 @@
 package io.github.pmeiggs.firstPlugin.listeners;
 
+import io.github.pmeiggs.firstPlugin.commands.PvpToggle;
 import org.bukkit.Material;
 import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
@@ -7,8 +8,11 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
@@ -26,13 +30,15 @@ import java.util.UUID;
 public class CombatListener implements Listener {
 
     private final HashMap<UUID, Long> combatTags = new HashMap<>();
-    private final long COMBAT_COOLDOWN_MS = 10000; // 10 seconds combat block
+    private final long COMBAT_COOLDOWN_MS = 15000; // 15 seconds combat block, increased 10 -> 15s
     private final HashMap<UUID, TextColor> previousUsernameColour = new HashMap<>();
     private final HashMap<UUID, Component> previousPlayerListName = new HashMap<>();
     private final JavaPlugin plugin;
+    private final PvpToggle pvpToggle;
 
-    public CombatListener(JavaPlugin plugin) {
+    public CombatListener(JavaPlugin plugin, PvpToggle pvpToggle) {
         this.plugin = plugin;
+        this.pvpToggle = pvpToggle;
     }
 
     private void tagPlayer(Player player, long now) {
@@ -78,6 +84,11 @@ public class CombatListener implements Listener {
         UUID playerId = event.getPlayer().getUniqueId();
         combatTags.remove(playerId);
         restoreUsernameColour(playerId);
+
+        Player player = event.getPlayer();
+        if (isCombatTagged(player)) { //added functionality for combat logging
+            player.setHealth(0);
+        }
     }
 
     @EventHandler
@@ -91,15 +102,28 @@ public class CombatListener implements Listener {
             long now = System.currentTimeMillis();
             tagPlayer(victim, now);
             tagPlayer(attacker, now);
-
-            // Disable Punch Enchantment in combat
-            ItemStack bow = attacker.getInventory().getItemInMainHand();
-            if (bow.containsEnchantment(Enchantment.PUNCH)) {
-                arrow.setKnockbackStrength(0);
-                attacker.sendMessage("§cPunch enchantment is disabled in combat!");
-            }
         }
     }
+    @EventHandler
+    private void disablePunch(EntityShootBowEvent bowShoot) {
+        ItemStack bow = bowShoot.getBow();
+
+        if(!(bowShoot.getEntity() instanceof Player player)) {//if entity isnt a player
+            return;
+        }
+
+        if(pvpToggle.isPvpDisabled(player)){ //if player has pvp disabled
+            return;
+        }
+
+        if(!(bow.containsEnchantment(Enchantment.PUNCH))) {//if bow doesnt have punch
+            return;
+        }
+
+        bowShoot.setCancelled(true);
+        player.sendMessage("§cYour bow has §lPunch! §r§cYou won't be able to use this one as your combat is toggled on.");
+    }
+
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
@@ -107,43 +131,42 @@ public class CombatListener implements Listener {
         ItemStack item = event.getItem();
 
         if (item == null) return;
-
-        boolean inCombat = combatTags.containsKey(player.getUniqueId()) &&
-                (System.currentTimeMillis() - combatTags.get(player.getUniqueId()) < COMBAT_COOLDOWN_MS);
-
-        // Disable GApples in combat
-        if (inCombat && (item.getType() == Material.GOLDEN_APPLE || item.getType() == Material.ENCHANTED_GOLDEN_APPLE)) {
-            if (event.getAction().name().contains("RIGHT")) {
-                event.setCancelled(true);
-                player.sendMessage("§cYou cannot consume Golden Apples while in combat!");
-            }
+        if (event.getAction().name().contains("RIGHT")) {
+            return;
+        }
+        // Disable Enchanted GApples while having combat on
+        if (!(pvpToggle.isPvpDisabled(player)) && (item.getType() == Material.ENCHANTED_GOLDEN_APPLE)) { //now only enchanted gapples disabled
+            //disabled if combat is on, since players can eat before being tagged
+            event.setCancelled(true);
+            player.sendMessage("§cYou cannot consume §lEnchanted Golden Apples §r§cwhile having combat on!");
         }
 
         // Disable Ender Pearls in combat
-        if (inCombat && item.getType() == Material.ENDER_PEARL) {
+        if (isCombatTagged(player) && item.getType() == Material.ENDER_PEARL) {
             event.setCancelled(true);
-            player.sendMessage("§cYou cannot use Ender Pearls while in combat!");
+            player.sendMessage("§cYou cannot use §lEnder Pearls §r§cwhile in combat!");
         }
 
-        // Disable Riptide Tridents in combat
+        // Disable Riptide Tridents while having combat on
         if (item.getType() == Material.TRIDENT) {
-            if (inCombat && item.containsEnchantment(Enchantment.RIPTIDE)) {
-                event.setCancelled(true);
-                player.sendMessage("§cRiptide Tridents are disabled during combat!");
+            if (!(pvpToggle.isPvpDisabled(player)) && item.containsEnchantment(Enchantment.RIPTIDE)) {
+                event.setCancelled(true);//made it the same as gapples since people can just trident away
+                player.sendMessage("§c§lRiptide Tridents §r§care disabled while combat is disabled!");
             }
         }
     }
 
     // Disable Elytra in combat
     @EventHandler
-    public void onToggleFlight(PlayerToggleFlightEvent event) {
-        Player player = event.getPlayer();
-        boolean inCombat = combatTags.containsKey(player.getUniqueId()) &&
-                (System.currentTimeMillis() - combatTags.get(player.getUniqueId()) < COMBAT_COOLDOWN_MS);
+    public void onToggleFlight(EntityToggleGlideEvent event) {
 
-        if (inCombat && player.isGliding()) {
+        if(!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+        //fidxed, playertoggleflight doesnt consider elytra
+        if (isCombatTagged(player)) {
             event.setCancelled(true);
-            player.sendMessage("§cElytra flight is disabled during combat!");
+            player.sendMessage("§c§lElytra flight §r§cis disabled during combat!");
         }
     }
 
@@ -159,5 +182,11 @@ public class CombatListener implements Listener {
                 event.setCancelled(true);
             }
         }
+    }
+
+    //new method to verify if combat tagged
+    public boolean isCombatTagged(Player player) {
+        return combatTags.containsKey(player.getUniqueId()) &&
+                (System.currentTimeMillis() - combatTags.get(player.getUniqueId()) < COMBAT_COOLDOWN_MS);
     }
 }
