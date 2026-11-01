@@ -1,7 +1,9 @@
 package io.github.pmeiggs.firstPlugin;
 
 import io.github.pmeiggs.config.PluginConfig;
+import io.github.pmeiggs.firstPlugin.commands.HealCommand;
 import io.github.pmeiggs.firstPlugin.commands.PvpToggle;
+import io.github.pmeiggs.firstPlugin.commands.shortcuts.GamemodeCommands;
 import io.github.pmeiggs.firstPlugin.listeners.ConnectionListener;
 import io.github.pmeiggs.firstPlugin.listeners.CrystalListener;
 import io.github.pmeiggs.firstPlugin.listeners.NetheriteListener;
@@ -10,6 +12,8 @@ import io.github.pmeiggs.firstPlugin.listeners.CombatListener;
 import io.github.pmeiggs.firstPlugin.listeners.PvpDamageListener;
 import io.github.pmeiggs.firstPlugin.listeners.TunnelingListener;
 
+import io.papermc.paper.plugin.lifecycle.event.LifecycleEvent;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,7 +31,7 @@ public class FirstPlugin extends JavaPlugin {
         // Plugin startup logic
         IO.println("[pm] Plugin Started properly");
 
-        getServer().getPluginManager().registerEvents(new CombatListener(this), this);
+        getServer().getPluginManager().registerEvents(new CombatListener(this, new PvpToggle(this)), this);
         getServer().getPluginManager().registerEvents(new WorldNerfListener(), this);
         getServer().getPluginManager().registerEvents(new ConnectionListener(pluginConfig), this);
 
@@ -41,6 +45,13 @@ public class FirstPlugin extends JavaPlugin {
         registerCommand("togglepvp", pvpToggle);
         getServer().getPluginManager().registerEvents(new PvpDamageListener(pvpToggle), this);
 
+        //register heal command
+        registerCommand("heal", new HealCommand());
+
+        //register gamemode command shortcuts
+        getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,event -> {
+            event.registrar().register(GamemodeCommands.create());
+        });
         //hide locator bar
 
         loadCustomEnchants();
