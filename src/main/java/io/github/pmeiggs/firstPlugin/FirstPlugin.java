@@ -1,6 +1,7 @@
 package io.github.pmeiggs.firstPlugin;
 
 import io.github.pmeiggs.config.PluginConfig;
+import io.github.pmeiggs.firstPlugin.commands.HealCommand;
 import io.github.pmeiggs.firstPlugin.commands.PvpToggle;
 import io.github.pmeiggs.firstPlugin.listeners.ConnectionListener;
 import io.github.pmeiggs.firstPlugin.listeners.CrystalListener;
@@ -40,6 +41,9 @@ public class FirstPlugin extends JavaPlugin {
         PvpToggle pvpToggle = new PvpToggle(this);
         registerCommand("togglepvp", pvpToggle);
         getServer().getPluginManager().registerEvents(new PvpDamageListener(pvpToggle), this);
+
+        //register heal command
+        registerCommand("heal", new HealCommand());
 
         //hide locator bar
 

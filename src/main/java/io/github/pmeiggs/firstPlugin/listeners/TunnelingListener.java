@@ -30,7 +30,9 @@ public class TunnelingListener implements Listener {
             Material.COBBLESTONE,
             Material.STONE,
             Material.COBBLED_DEEPSLATE,
-            Material.DEEPSLATE
+            Material.DEEPSLATE,
+            Material.ANDESITE,
+            Material.GRANITE
     );
 
     public TunnelingListener(JavaPlugin plugin, PluginConfig pluginConfig, Enchantment tunneling) {
@@ -46,7 +48,9 @@ public class TunnelingListener implements Listener {
                 || playersBreakingTunnelBlocks.contains(player.getUniqueId())) {
             return;
         }
-
+        if(player.isSneaking()){
+            return;
+        }
         ItemStack tool = player.getInventory().getItemInMainHand();
         if (tunneling == null || tool.getEnchantmentLevel(tunneling) == 0) {
             return;
