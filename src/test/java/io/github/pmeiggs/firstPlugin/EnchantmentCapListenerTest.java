@@ -16,7 +16,7 @@ import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.EnchantingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
-import org.bukkit.inventory.meta.EnchantedBookMeta;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EnchantmentCapListenerTest {
 
@@ -48,34 +47,48 @@ class EnchantmentCapListenerTest {
     void enchantingTableOffersAreCappedAtLevel3() {
         Player player = MockBukkit.getMock().addPlayer();
         ItemStack item = new ItemStack(Material.DIAMOND_SWORD);
-        EnchantingInventory inventory = (EnchantingInventory) MockBukkit.getMock().createInventory(null, InventoryType.ENCHANTING);
 
-        // Mock enchanting offers simulating rolls for Sharpness 5 or Protection 4
-        PrepareItemEnchantEvent event = new PrepareItemEnchantEvent(player, null, inventory, item, new org.bukkit.enchantments.EnchantmentOffer[]{
-                new org.bukkit.enchantments.EnchantmentOffer(Enchantment.SHARPNESS, 5, 30),
-                new org.bukkit.enchantments.EnchantmentOffer(Enchantment.PROTECTION, 4, 30),
-                new org.bukkit.enchantments.EnchantmentOffer(Enchantment.UNBREAKING, 3, 10)
-        }, new int[]{1, 2, 3}, 0);
+        // Fixed: Pass a single integer cost (e.g., 30) instead of an int array at the end
+        PrepareItemEnchantEvent event = new PrepareItemEnchantEvent(
+                player,
+                null,
+                null,
+                item,
+                new org.bukkit.enchantments.EnchantmentOffer[]{
+                        new org.bukkit.enchantments.EnchantmentOffer(Enchantment.SHARPNESS, 5, 30),
+                        new org.bukkit.enchantments.EnchantmentOffer(Enchantment.PROTECTION, 4, 30),
+                        new org.bukkit.enchantments.EnchantmentOffer(Enchantment.UNBREAKING, 3, 10)
+                },
+                30
+        );
 
         plugin.getServer().getPluginManager().callEvent(event);
 
         assertEquals(3, event.getOffers()[0].getEnchantmentLevel());
         assertEquals(3, event.getOffers()[1].getEnchantmentLevel());
-        assertEquals(3, event.getOffers()[2].getEnchantmentLevel()); 
-        //unbreaking 3 should remain untouched
+        assertEquals(3, event.getOffers()[2].getEnchantmentLevel());
     }
 
     @Test
     void enchantingItemEventClampsEnchantsToAdd() {
         Player player = MockBukkit.getMock().addPlayer();
         ItemStack item = new ItemStack(Material.DIAMOND_SWORD);
-        EnchantingInventory inventory = (EnchantingInventory) MockBukkit.getMock().createInventory(null, InventoryType.ENCHANTING);
 
         Map<Enchantment, Integer> enchantsToAdd = new HashMap<>();
         enchantsToAdd.put(Enchantment.SHARPNESS, 5);
         enchantsToAdd.put(Enchantment.PROTECTION, 4);
 
-        EnchantItemEvent event = new EnchantItemEvent(player, inventory, item, 30, enchantsToAdd, new HashMap<>(), 0);
+        EnchantItemEvent event = new EnchantItemEvent(
+                player,
+                null,
+                null,
+                item,
+                30,
+                enchantsToAdd,
+                Enchantment.SHARPNESS,
+                5,
+                0
+        );
         plugin.getServer().getPluginManager().callEvent(event);
 
         assertEquals(3, event.getEnchantsToAdd().get(Enchantment.SHARPNESS));
@@ -85,12 +98,11 @@ class EnchantmentCapListenerTest {
     @Test
     void anvilCombinationsAreCappedAtLevel3() {
         Player player = MockBukkit.getMock().addPlayer();
-        AnvilInventory anvilInventory = (AnvilInventory) MockBukkit.getMock().createInventory(null, InventoryType.ANVIL);
         
         ItemStack result = new ItemStack(Material.DIAMOND_SWORD);
         result.addUnsafeEnchantment(Enchantment.SHARPNESS, 5);
 
-        PrepareAnvilEvent event = new PrepareAnvilEvent(anvilInventory, result);
+        PrepareAnvilEvent event = new PrepareAnvilEvent(null, result);
         plugin.getServer().getPluginManager().callEvent(event);
 
         assertEquals(3, event.getResult().getEnchantmentLevel(Enchantment.SHARPNESS));
@@ -98,11 +110,11 @@ class EnchantmentCapListenerTest {
 
     @Test
     void villagerLibrarianTradesForHighTierEnchantsAreCapped() {
-        Villager villager = (Villager) MockBukkit.getMock().addPlayer().getWorld().spawnEntity(
-                MockBukkit.getMock().addPlayer().getLocation(), EntityType.VILLAGER);
+        Player player = MockBukkit.getMock().addPlayer();
+        Villager villager = (Villager) player.getWorld().spawnEntity(player.getLocation(), EntityType.VILLAGER);
 
         ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
-        EnchantedBookMeta meta = (EnchantedBookMeta) book.getItemMeta();
+        EnchantmentStorageMeta meta = (EnchantmentStorageMeta) book.getItemMeta();
         meta.addStoredEnchant(Enchantment.PROTECTION, 4, true);
         book.setItemMeta(meta);
 
@@ -112,7 +124,7 @@ class EnchantmentCapListenerTest {
         VillagerAcquireTradeEvent event = new VillagerAcquireTradeEvent(villager, recipe);
         plugin.getServer().getPluginManager().callEvent(event);
 
-        EnchantedBookMeta resultMeta = (EnchantedBookMeta) event.getRecipe().getResult().getItemMeta();
+        EnchantmentStorageMeta resultMeta = (EnchantmentStorageMeta) event.getRecipe().getResult().getItemMeta();
         assertEquals(3, resultMeta.getStoredEnchantLevel(Enchantment.PROTECTION));
     }
 
@@ -124,9 +136,8 @@ class EnchantmentCapListenerTest {
 
         player.getInventory().setItemInMainHand(illegalItem);
 
-        //should trigger an inventory click event involving the item
         InventoryClickEvent event = new InventoryClickEvent(
-                player.getOpenInventory(),
+                player.openInventory(player.getInventory()),
                 InventoryType.SlotType.CONTAINER,
                 0,
                 org.bukkit.event.inventory.ClickType.LEFT,
