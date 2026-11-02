@@ -71,11 +71,11 @@ public class PluginConfig{
     }
 
     public int getMaxProtectionLevel() {
-    return config.getInt("max-levels.protection", 3);
+    return plugin.getConfig().getInt("max-levels.protection", 3);
     }
     
     public int getMaxSharpnessLevel() {
-        return config.getInt("max-levels.sharpness", 3);
+        return plugin.getConfig().getInt("max-levels.sharpness", 3);
     }
 
     public String getJoinMessagePrefix() {
