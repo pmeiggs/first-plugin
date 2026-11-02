@@ -7,8 +7,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class PluginConfig{
     public static final long DEFAULT_COMBAT_COOLDOWN_MS = 15000;
+    public static final double DEFAULT_ENCHANTED_BOOK_PRICE_MULTIPLIER = 1.5;
 
     private JavaPlugin plugin;
+    private boolean invalidEnchantedBookPriceMultiplierLogged;
 
     public PluginConfig(JavaPlugin plugin){
         this.plugin = plugin;
@@ -24,6 +26,28 @@ public class PluginConfig{
 
     public long getCombatCooldownMs() {
         return plugin.getConfig().getLong("combatCooldownMs", DEFAULT_COMBAT_COOLDOWN_MS);
+    }
+
+    public double getEnchantedBookPriceMultiplier() {
+        double multiplier = plugin.getConfig().getDouble(
+                "villager-trades.enchanted-book-price-multiplier",
+                DEFAULT_ENCHANTED_BOOK_PRICE_MULTIPLIER
+        );
+        if (!Double.isFinite(multiplier) || multiplier < 1.0) {
+            if (!invalidEnchantedBookPriceMultiplierLogged) {
+                plugin.getLogger().warning(
+                        "Invalid villager-trades.enchanted-book-price-multiplier; using "
+                                + DEFAULT_ENCHANTED_BOOK_PRICE_MULTIPLIER + ". The value must be finite and at least 1.0."
+                );
+                invalidEnchantedBookPriceMultiplierLogged = true;
+            }
+            return DEFAULT_ENCHANTED_BOOK_PRICE_MULTIPLIER;
+        }
+        return multiplier;
+    }
+
+    public void setEnchantedBookPriceMultiplier(double multiplier) {
+        plugin.getConfig().set("villager-trades.enchanted-book-price-multiplier", multiplier);
     }
 
     public boolean isCrystalPvpEnabled(){

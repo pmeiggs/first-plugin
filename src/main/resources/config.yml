@@ -5,6 +5,9 @@ combatCooldownMs: 15000
 crystalPvpEnabled: false
 netheriteSmithingEnabled: false
 
+villager-trades:
+  enchanted-book-price-multiplier: 1.5
+
 custom-enchantments:
   tunneling:
     enabled: true
