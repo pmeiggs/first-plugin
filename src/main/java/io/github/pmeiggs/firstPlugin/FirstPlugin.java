@@ -12,6 +12,7 @@ import io.github.pmeiggs.firstPlugin.listeners.WorldNerfListener;
 import io.github.pmeiggs.firstPlugin.listeners.CombatListener;
 import io.github.pmeiggs.firstPlugin.listeners.PvpDamageListener;
 import io.github.pmeiggs.firstPlugin.listeners.TunnelingListener;
+import io.github.pmeiggs.firstPlugin.listeners.EnchantmentCapListener;
 import io.github.pmeiggs.firstPlugin.listeners.VillagerTradeLockListener;
 import io.github.pmeiggs.firstPlugin.listeners.LibrarianBookPriceListener;
 
@@ -46,6 +47,7 @@ public class FirstPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new NetheriteListener(pluginConfig), this);
         getServer().getPluginManager().registerEvents(new VillagerTradeLockListener(this), this);
         getServer().getPluginManager().registerEvents(new LibrarianBookPriceListener(pluginConfig), this);
+        getServer().getPluginManager().registerEvents(new EnchantmentCapListener(pluginConfig), this);
 
         //register pvp toggle command
         registerCommand("togglepvp", pvpToggle);
