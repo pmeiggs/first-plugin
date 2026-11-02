@@ -1,5 +1,6 @@
 package io.github.pmeiggs.firstPlugin.listeners;
 
+import io.github.pmeiggs.config.PluginConfig;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -19,17 +20,28 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class EnchantmentCapListener implements Listener {
 
+    private final PluginConfig pluginConfig;
+
+    public EnchantmentCapListener(PluginConfig pluginConfig) {
+        this.pluginConfig = pluginConfig;
+    }
+
     //ENCHANTMENT TABLE
     //should modify the enchantment text to ensure it is accurate before rolling
     @EventHandler
       public void onPrepareEnchant(PrepareItemEnchantEvent event) {
+          int maxProt = pluginConfig.getMaxProtectionLevel();
+          int maxSharp = pluginConfig.getMaxSharpnessLevel();
+          
           var offers = event.getOffers();
           for (var offer : offers) {
               if (offer != null && offer.getEnchantment() != null) {
                   Enchantment enchant = offer.getEnchantment();
-                  if ((enchant.equals(Enchantment.PROTECTION) || enchant.equals(Enchantment.SHARPNESS)) && offer.getEnchantmentLevel() > 3) {
-                      offer.setEnchantmentLevel(3);
-                  }
+                if (enchant.equals(Enchantment.PROTECTION) && offer.getEnchantmentLevel() > maxProt) {
+                    offer.setEnchantmentLevel(maxProt);
+                } else if (enchant.equals(Enchantment.SHARPNESS) && offer.getEnchantmentLevel() > maxSharp) {
+                    offer.setEnchantmentLevel(maxSharp);
+                }
               }
           }
       }
@@ -37,9 +49,14 @@ public class EnchantmentCapListener implements Listener {
     //should cap any rolled Protection or Sharpness at Level 3 in the Enchantment Table
     @EventHandler
     public void onEnchantItem(EnchantItemEvent event) {
+        int maxProt = pluginConfig.getMaxProtectionLevel();
+        int maxSharp = pluginConfig.getMaxSharpnessLevel();
         event.getEnchantsToAdd().replaceAll((enchant, level) -> {
-            if ((enchant.equals(Enchantment.PROTECTION) || enchant.equals(Enchantment.SHARPNESS)) && level > 3) {
-                return 3;
+            if (enchant.equals(Enchantment.PROTECTION) && level > maxProt) {
+                return maxProt;
+            }
+            if (enchant.equals(Enchantment.SHARPNESS) && level > maxSharp) {
+                return maxSharp;
             }
             return level;
         });
@@ -50,10 +67,13 @@ public class EnchantmentCapListener implements Listener {
     //Should prevent combining books/items to bypass the level 3 cap in an anvil
     @EventHandler
     public void onPrepareAnvil(PrepareAnvilEvent event) {
+        int maxProt = pluginConfig.getMaxProtectionLevel();
+        int maxSharp = pluginConfig.getMaxSharpnessLevel();
+        
         ItemStack result = event.getResult();
         if (result != null) {
-            capEnchantment(result, Enchantment.PROTECTION);
-            capEnchantment(result, Enchantment.SHARPNESS);
+            capEnchantment(result, Enchantment.PROTECTION, maxProt);
+            capEnchantment(result, Enchantment.SHARPNESS, maxSharp);
         }
     }
 
@@ -61,6 +81,9 @@ public class EnchantmentCapListener implements Listener {
     //should prevent Librarians from acquiring Prot 4 or Sharp 4/5 book trades
     @EventHandler
     public void onVillagerAcquireTrade(VillagerAcquireTradeEvent event) {
+        int maxProt = pluginConfig.getMaxProtectionLevel();
+        int maxSharp = pluginConfig.getMaxSharpnessLevel();
+        
         MerchantRecipe recipe = event.getRecipe();
         ItemStack result = recipe.getResult();
 
@@ -76,9 +99,13 @@ public class EnchantmentCapListener implements Listener {
                         Enchantment enchant = entry.getKey();
                         int level = entry.getValue();
         
-                        if ((enchant.equals(Enchantment.PROTECTION) || enchant.equals(Enchantment.SHARPNESS)) && level > 3) {
+                        if (enchant.equals(Enchantment.PROTECTION) && level > maxProt) {
                             bookMeta.removeStoredEnchant(enchant);
-                            bookMeta.addStoredEnchant(enchant, 3, true);
+                            bookMeta.addStoredEnchant(enchant, maxProt, true);
+                            modified = true;
+                        } else if (enchant.equals(Enchantment.SHARPNESS) && level > maxSharp) {
+                            bookMeta.removeStoredEnchant(enchant);
+                            bookMeta.addStoredEnchant(enchant, maxSharp, true);
                             modified = true;
                         }
                     }
@@ -101,33 +128,37 @@ public class EnchantmentCapListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
+        int maxProt = pluginConfig.getMaxProtectionLevel();
+        int maxSharp = pluginConfig.getMaxSharpnessLevel();
         
-        capEnchantment(event.getCursor(), Enchantment.PROTECTION);
-        capEnchantment(event.getCursor(), Enchantment.SHARPNESS);
-        capEnchantment(event.getCurrentItem(), Enchantment.PROTECTION);
-        capEnchantment(event.getCurrentItem(), Enchantment.SHARPNESS);
+        capEnchantment(event.getCursor(), Enchantment.PROTECTION, maxProt);
+        capEnchantment(event.getCursor(), Enchantment.SHARPNESS, maxSharp);
+        capEnchantment(event.getCurrentItem(), Enchantment.PROTECTION, maxProt);
+        capEnchantment(event.getCurrentItem(), Enchantment.SHARPNESS, maxSharp);
     }
 
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
+        int maxProt = pluginConfig.getMaxProtectionLevel();
+        int maxSharp = pluginConfig.getMaxSharpnessLevel();
+
         for (ItemStack item : event.getNewItems().values()) {
-            capEnchantment(item, Enchantment.PROTECTION);
-            capEnchantment(item, Enchantment.SHARPNESS);
+            capEnchantment(item, Enchantment.PROTECTION, maxProt);
+            capEnchantment(item, Enchantment.SHARPNESS, maxSharp);
         }
     }
 
   //HELPER FUNCTION
-    private void capEnchantment(ItemStack item, Enchantment enchantment) {
+    private void capEnchantment(ItemStack item, Enchantment enchantment, int maxLevel) {
         if (item != null) {
-            if (item.containsEnchantment(enchantment) && item.getEnchantmentLevel(enchantment) > 3) {
+            if (item.containsEnchantment(enchantment) && item.getEnchantmentLevel(enchantment) > maxLevel) {
                 item.removeEnchantment(enchantment);
-                item.addEnchantment(enchantment, 3);
+                item.addEnchantment(enchantment, maxLevel);
             }
-            // Also check stored enchants if it's an enchanted book
-            if (item.getItemMeta() instanceof org.bukkit.inventory.meta.EnchantmentStorageMeta storeMeta) {
-                if (storeMeta.hasStoredEnchant(enchantment) && storeMeta.getStoredEnchantLevel(enchantment) > 3) {
+            if (item.getItemMeta() instanceof EnchantmentStorageMeta storeMeta) {
+                if (storeMeta.hasStoredEnchant(enchantment) && storeMeta.getStoredEnchantLevel(enchantment) > maxLevel) {
                     storeMeta.removeStoredEnchant(enchantment);
-                    storeMeta.addStoredEnchant(enchantment, 3, true);
+                    storeMeta.addStoredEnchant(enchantment, maxLevel, true);
                     item.setItemMeta(storeMeta);
                 }
             }
