@@ -12,6 +12,7 @@ import io.github.pmeiggs.firstPlugin.listeners.WorldNerfListener;
 import io.github.pmeiggs.firstPlugin.listeners.CombatListener;
 import io.github.pmeiggs.firstPlugin.listeners.PvpDamageListener;
 import io.github.pmeiggs.firstPlugin.listeners.TunnelingListener;
+import io.github.pmeiggs.firstPlugin.listeners.VillagerTradeLockListener;
 
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEvent;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -42,6 +43,7 @@ public class FirstPlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new CrystalListener(pluginConfig), this);
         getServer().getPluginManager().registerEvents(new NetheriteListener(pluginConfig), this);
+        getServer().getPluginManager().registerEvents(new VillagerTradeLockListener(this), this);
 
         //register pvp toggle command
         registerCommand("togglepvp", pvpToggle);
