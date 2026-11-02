@@ -65,7 +65,7 @@ public class FirstPlugin extends JavaPlugin {
 
         Enchantment tunneling = Registry.ENCHANTMENT.get(TunnelingListener.getEnchantmentKey());
         if (tunneling == null) {
-            getLogger().warning("Datapack enchantment fockysenchants:tunneling was not loaded; tunneling will be inactive.");
+            getLogger().warning("Datapack enchantment fockysdatapack:tunneling was not loaded; tunneling will be inactive.");
         }
         getServer().getPluginManager().registerEvents(new TunnelingListener(this, pluginConfig, tunneling), this);
 

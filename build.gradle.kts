@@ -29,8 +29,8 @@ tasks {
         jvmArgs("-Xms2G", "-Xmx2G", "-Dcom.mojang.eula.agree=true")
         doFirst {
             copy {
-                from(layout.projectDirectory.dir("datapacks/fockysEnchants"))
-                into(layout.projectDirectory.dir("run/world/datapacks/fockysEnchants"))
+                from(layout.projectDirectory.dir("datapacks/fockysDatapack"))
+                into(layout.projectDirectory.dir("run/world/datapacks/fockysDatapack"))
             }
         }
     }

@@ -122,6 +122,6 @@ public class TunnelingListener implements Listener {
     }
 
     public static NamespacedKey getEnchantmentKey() {
-        return new NamespacedKey("fockysenchants", "tunneling");
+        return new NamespacedKey("fockysdatapack", "tunneling");
     }
 }
