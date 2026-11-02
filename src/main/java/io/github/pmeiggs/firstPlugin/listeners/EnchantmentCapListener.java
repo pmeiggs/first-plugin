@@ -1,14 +1,21 @@
 package io.github.pmeiggs.firstPlugin.listeners;
 
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
+import org.bukkit.event.entity.VillagerAcquireTradeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MerchantRecipe;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class EnchantmentCapListener implements Listener {
 
@@ -31,8 +38,7 @@ public class EnchantmentCapListener implements Listener {
     @EventHandler
     public void onEnchantItem(EnchantItemEvent event) {
         event.getEnchantsToAdd().replaceAll((enchant, level) -> {
-            String name = enchant.getKey().getKey();
-            if ((name.equals("protection") || name.equals("sharpness")) && level > 3) {
+            if ((enchant.equals(Enchantment.PROTECTION) || enchant.equals(Enchantment.SHARPNESS)) && level > 3) {
                 return 3;
             }
             return level;
@@ -58,25 +64,32 @@ public class EnchantmentCapListener implements Listener {
         MerchantRecipe recipe = event.getRecipe();
         ItemStack result = recipe.getResult();
 
-        if (result.getItemMeta() instanceof EnchantedBookMeta bookMeta) {
-            boolean modified = false;
-            for (var entry : bookMeta.getStoredEnchants().entrySet()) {
-                Enchantment enchant = entry.getKey();
-                int level = entry.getValue();
+        if (result != null && result.hasItemMeta()) {
+            ItemMeta meta = result.getItemMeta();
 
-                if ((enchant.equals(Enchantment.PROTECTION) || enchant.equals(Enchantment.SHARPNESS)) && level > 3) {
-                    bookMeta.removeStoredEnchant(enchant);
-                    bookMeta.addStoredEnchant(enchant, 3, true);
-                    modified = true;
-                }
-            }
-
-            if (modified) {
-                ItemStack newResult = result.clone();
-                newResult.setItemMeta(bookMeta);
-                MerchantRecipe newRecipe = new MerchantRecipe(newResult, recipe.getUses(), recipe.getMaxUses(), recipe.hasExperienceReward(), recipe.getVillagerExperience(), recipe.getPriceMultiplier());
-                newRecipe.setIngredients(recipe.getIngredients());
-                event.setRecipe(newRecipe);
+            //check if it's an enchanted book or has stored enchants using meta
+            if (result.getType() == Material.ENCHANTED_BOOK || meta instanceof EnchantmentStorageMeta) {
+                	org.bukkit.inventory.meta.EnchantmentStorageMeta bookMeta = (EnchantmentStorageMeta) meta;
+                	boolean modified = false;
+    
+                    for (var entry : bookMeta.getStoredEnchants().entrySet()) {
+                        Enchantment enchant = entry.getKey();
+                        int level = entry.getValue();
+        
+                        if ((enchant.equals(Enchantment.PROTECTION) || enchant.equals(Enchantment.SHARPNESS)) && level > 3) {
+                            bookMeta.removeStoredEnchant(enchant);
+                            bookMeta.addStoredEnchant(enchant, 3, true);
+                            modified = true;
+                        }
+                    }
+    
+                    if (modified) {
+                        ItemStack newResult = result.clone();
+                        newResult.setItemMeta(bookMeta);
+                        MerchantRecipe newRecipe = new MerchantRecipe(newResult, recipe.getUses(), recipe.getMaxUses(), recipe.hasExperienceReward(), recipe.getVillagerExperience(), recipe.getPriceMultiplier());
+                        newRecipe.setIngredients(recipe.getIngredients());
+                        event.setRecipe(newRecipe);
+        		    }
             }
         }
     }
@@ -104,11 +117,19 @@ public class EnchantmentCapListener implements Listener {
     }
 
   //HELPER FUNCTION
-  private void capEnchantment(ItemStack item, Enchantment enchantment) {
-        if (item != null && item.containsEnchantment(enchantment)) {
-            if (item.getEnchantmentLevel(enchantment) > 3) {
+    private void capEnchantment(ItemStack item, Enchantment enchantment) {
+        if (item != null) {
+            if (item.containsEnchantment(enchantment) && item.getEnchantmentLevel(enchantment) > 3) {
                 item.removeEnchantment(enchantment);
                 item.addEnchantment(enchantment, 3);
+            }
+            // Also check stored enchants if it's an enchanted book
+            if (item.getItemMeta() instanceof org.bukkit.inventory.meta.EnchantmentStorageMeta storeMeta) {
+                if (storeMeta.hasStoredEnchant(enchantment) && storeMeta.getStoredEnchantLevel(enchantment) > 3) {
+                    storeMeta.removeStoredEnchant(enchantment);
+                    storeMeta.addStoredEnchant(enchantment, 3, true);
+                    item.setItemMeta(storeMeta);
+                }
             }
         }
     }
