@@ -70,6 +70,14 @@ public class PluginConfig{
         return plugin.getConfig().getBoolean("custom-enchantments.tunneling.enabled", true);
     }
 
+    public int getMaxProtectionLevel() {
+    return plugin.getConfig().getInt("max-levels.protection", 3);
+    }
+    
+    public int getMaxSharpnessLevel() {
+        return plugin.getConfig().getInt("max-levels.sharpness", 3);
+    }
+
     public String getJoinMessagePrefix() {
         return plugin.getConfig().getString("messages.join-prefix");
     }
@@ -77,6 +85,7 @@ public class PluginConfig{
     public String getJoinMessageSuffix() {
         return plugin.getConfig().getString("messages.join-suffix");
     }
+
 
     public void reload(){
         plugin.reloadConfig();
