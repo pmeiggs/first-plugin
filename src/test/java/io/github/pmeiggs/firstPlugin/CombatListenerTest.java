@@ -276,4 +276,44 @@ class CombatListenerTest {
 
         assertTrue(event.isCancelled());
     }
+
+    @Test
+    void maceDamageAboveEightHeartsIsCappedAtSixteenHealthPoints() {
+        Assertions.assertNotNull(MockBukkit.getMock());
+        Player attacker = MockBukkit.getMock().addPlayer();
+        Player victim = MockBukkit.getMock().addPlayer();
+        attacker.getInventory().setItemInMainHand(new ItemStack(Material.MACE));
+        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
+                attacker, victim, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 24);
+
+        plugin.getServer().getPluginManager().callEvent(event);
+
+        assertEquals(16, event.getFinalDamage(), 0.001);
+    }
+
+    @Test
+    void maceDamageAtOrBelowEightHeartsIsUnchanged() {
+        Player attacker = MockBukkit.getMock().addPlayer();
+        Player victim = MockBukkit.getMock().addPlayer();
+        attacker.getInventory().setItemInMainHand(new ItemStack(Material.MACE));
+        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
+                attacker, victim, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 12);
+
+        plugin.getServer().getPluginManager().callEvent(event);
+
+        assertEquals(12, event.getFinalDamage(), 0.001);
+    }
+
+    @Test
+    void nonMaceDamageAboveEightHeartsIsUnchanged() {
+        Player attacker = MockBukkit.getMock().addPlayer();
+        Player victim = MockBukkit.getMock().addPlayer();
+        attacker.getInventory().setItemInMainHand(new ItemStack(Material.DIAMOND_SWORD));
+        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
+                attacker, victim, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 24);
+
+        plugin.getServer().getPluginManager().callEvent(event);
+
+        assertEquals(24, event.getFinalDamage(), 0.001);
+    }
 }
