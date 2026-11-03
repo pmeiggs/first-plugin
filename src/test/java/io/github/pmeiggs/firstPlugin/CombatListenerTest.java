@@ -9,21 +9,27 @@ import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.block.BlockFace;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.MockBukkit;
@@ -245,5 +251,69 @@ class CombatListenerTest {
                 false);
         plugin.getServer().getPluginManager().callEvent(event);
         return event;
+    }
+    @Test
+    void droppedMaceDoesNotDespawn() {
+        Assertions.assertNotNull(MockBukkit.getMock());
+        Player player = MockBukkit.getMock().addPlayer();
+        Item dropped = player.getWorld().dropItem(player.getLocation(), new ItemStack(Material.MACE));
+
+        plugin.getServer().getPluginManager()
+                .callEvent(new PlayerDropItemEvent(player, dropped));
+
+        ItemDespawnEvent despawnEvent = new ItemDespawnEvent(dropped, dropped.getLocation());
+        plugin.getServer().getPluginManager().callEvent(despawnEvent);
+        assertTrue(despawnEvent.isCancelled());
+    }
+    @Test
+    void maceDoesNotTakeDurabilityDamage() {
+        Assertions.assertNotNull(MockBukkit.getMock());
+        Player player = MockBukkit.getMock().addPlayer();
+        PlayerItemDamageEvent event =
+                new PlayerItemDamageEvent(player, new ItemStack(Material.MACE), 1);
+
+        plugin.getServer().getPluginManager().callEvent(event);
+
+        assertTrue(event.isCancelled());
+    }
+
+    @Test
+    void maceDamageAboveEightHeartsIsCappedAtSixteenHealthPoints() {
+        Assertions.assertNotNull(MockBukkit.getMock());
+        Player attacker = MockBukkit.getMock().addPlayer();
+        Player victim = MockBukkit.getMock().addPlayer();
+        attacker.getInventory().setItemInMainHand(new ItemStack(Material.MACE));
+        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
+                attacker, victim, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 24);
+
+        plugin.getServer().getPluginManager().callEvent(event);
+
+        assertEquals(16, event.getFinalDamage(), 0.001);
+    }
+
+    @Test
+    void maceDamageAtOrBelowEightHeartsIsUnchanged() {
+        Player attacker = MockBukkit.getMock().addPlayer();
+        Player victim = MockBukkit.getMock().addPlayer();
+        attacker.getInventory().setItemInMainHand(new ItemStack(Material.MACE));
+        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
+                attacker, victim, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 12);
+
+        plugin.getServer().getPluginManager().callEvent(event);
+
+        assertEquals(12, event.getFinalDamage(), 0.001);
+    }
+
+    @Test
+    void nonMaceDamageAboveEightHeartsIsUnchanged() {
+        Player attacker = MockBukkit.getMock().addPlayer();
+        Player victim = MockBukkit.getMock().addPlayer();
+        attacker.getInventory().setItemInMainHand(new ItemStack(Material.DIAMOND_SWORD));
+        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
+                attacker, victim, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 24);
+
+        plugin.getServer().getPluginManager().callEvent(event);
+
+        assertEquals(24, event.getFinalDamage(), 0.001);
     }
 }

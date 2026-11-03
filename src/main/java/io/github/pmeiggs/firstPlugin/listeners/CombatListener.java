@@ -6,17 +6,12 @@ import org.bukkit.Material;
 import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityPotionEffectEvent;
-import org.bukkit.event.entity.EntityShootBowEvent;
-import org.bukkit.event.entity.EntityToggleGlideEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 
@@ -188,6 +183,43 @@ public class CombatListener implements Listener {
                     type.equals(PotionEffectType.SLOW_FALLING))) {
                 event.setCancelled(true);
             }
+        }
+    }
+
+    @EventHandler
+    public void maceDamageChange(EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof Player player)) {
+            return;
+        }
+        //get item in main hand of player
+        if (player.getInventory().getItemInMainHand().getType() != Material.MACE) {
+            return;
+        }
+        //set damage cap of mace at 8 hearts
+        if ((event.getFinalDamage() > 16)) {
+            event.setDamage(event.getDamage() * (16/event.getFinalDamage()));
+        }
+    }
+
+    @EventHandler//make the mage durability infinite
+    public void maceDurabilityChange(PlayerItemDamageEvent durability) {
+        if (durability.getItem().getType() == Material.MACE) {
+            durability.setCancelled(true);
+        }
+    }
+
+    @EventHandler//make the mace invulnerable to damage while dropped
+    public void maceInvulnerableChange(PlayerDropItemEvent event) {
+        Item dropped = event.getItemDrop();
+        if (dropped.getItemStack().getType() == Material.MACE) {
+            dropped.setInvulnerable(true);
+        }
+    }
+
+    @EventHandler
+    public void maceDespawnChange(ItemDespawnEvent event) {
+        if (event.getEntity().getItemStack().getType() == Material.MACE) {
+            event.setCancelled(true);
         }
     }
 
