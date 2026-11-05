@@ -5,18 +5,9 @@ import io.github.pmeiggs.firstPlugin.commands.HealCommand;
 import io.github.pmeiggs.firstPlugin.commands.PvpToggle;
 import io.github.pmeiggs.firstPlugin.combat.CombatTagTracker;
 import io.github.pmeiggs.firstPlugin.commands.shortcuts.GamemodeCommands;
-import io.github.pmeiggs.firstPlugin.listeners.ConnectionListener;
-import io.github.pmeiggs.firstPlugin.listeners.CrystalListener;
-import io.github.pmeiggs.firstPlugin.listeners.NetheriteListener;
-import io.github.pmeiggs.firstPlugin.listeners.WorldNerfListener;
-import io.github.pmeiggs.firstPlugin.listeners.CombatListener;
-import io.github.pmeiggs.firstPlugin.listeners.PvpDamageListener;
-import io.github.pmeiggs.firstPlugin.listeners.TunnelingListener;
-import io.github.pmeiggs.firstPlugin.listeners.EnchantmentCapListener;
-import io.github.pmeiggs.firstPlugin.listeners.VillagerTradeLockListener;
-import io.github.pmeiggs.firstPlugin.listeners.LibrarianBookPriceListener;
+import io.github.pmeiggs.firstPlugin.listeners.*;
 
-import io.papermc.paper.plugin.lifecycle.event.LifecycleEvent;
+import io.github.pmeiggs.firstPlugin.recipes.CustomMaceRecipe;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
@@ -63,7 +54,11 @@ public class FirstPlugin extends JavaPlugin {
         //hide locator bar
 
         loadCustomEnchants();
-        
+        //register maceblocker listener#
+        getServer().getPluginManager().registerEvents(new MaceEnchantListener(), this);
+        //recipes
+        loadRecipes();
+
     }
 
 
@@ -74,6 +69,15 @@ public class FirstPlugin extends JavaPlugin {
             getLogger().warning("Datapack enchantment fockysdatapack:tunneling was not loaded; tunneling will be inactive.");
         }
         getServer().getPluginManager().registerEvents(new TunnelingListener(this, pluginConfig, tunneling), this);
+
+    }
+
+    public void loadRecipes(){
+        //mace recipe
+        CustomMaceRecipe customMaceRecipe = new CustomMaceRecipe(this);
+
+        customMaceRecipe.removeRecipe();
+        customMaceRecipe.addRecipe();
 
     }
 
