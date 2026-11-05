@@ -51,7 +51,8 @@ public class FirstPlugin extends JavaPlugin {
         getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,event -> {
             event.registrar().register(GamemodeCommands.create());
         });
-        //hide locator bar
+        //hide invisible player kills
+        getServer().getPluginManager().registerEvents(new InvisibleKillListener(), this);
 
         loadCustomEnchants();
         //register maceblocker listener#

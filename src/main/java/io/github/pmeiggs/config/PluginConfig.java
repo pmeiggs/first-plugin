@@ -86,6 +86,13 @@ public class PluginConfig{
         return plugin.getConfig().getString("messages.join-suffix");
     }
 
+    public boolean isInvisKilslEnabled(){
+        return plugin.getConfig().getBoolean("invisible-kills");
+    }
+
+    public void setInvisKillsEnabled(boolean enabled){
+        plugin.getConfig().set("invisible-kills", enabled);
+    }
 
     public void reload(){
         plugin.reloadConfig();

@@ -8,6 +8,9 @@ netheriteSmithingEnabled: false
 villager-trades:
   enchanted-book-price-multiplier: 1.5
 
+invisible-kills:
+  enabled: true
+
 custom-enchantments:
   tunneling:
     enabled: true
