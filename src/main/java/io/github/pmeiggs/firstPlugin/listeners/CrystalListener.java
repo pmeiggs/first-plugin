@@ -6,12 +6,19 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.Tag;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.type.RespawnAnchor;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.damage.DamageType;
@@ -56,7 +63,48 @@ public class CrystalListener implements Listener {
         }
     }
 
-    @EventHandler //cancel the bed or anchort explosion
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onBedOrAnchorUse(PlayerInteractEvent event) {
+        if (pluginConfig.isCrystalPvpEnabled()
+                || event.getAction() != Action.RIGHT_CLICK_BLOCK
+                || event.useInteractedBlock() == Event.Result.DENY) {
+            return;
+        }
+
+        Block block = event.getClickedBlock();
+        if (block == null) {
+            return;
+        }
+
+        Player player = event.getPlayer();
+        // Sneaking with an item bypasses block use, allowing placement against it.
+        if (player.isSneaking() && (!player.getInventory().getItemInMainHand().isEmpty()
+                || !player.getInventory().getItemInOffHand().isEmpty())) {
+            return;
+        }
+
+        boolean wouldExplode = false;
+        if (Tag.BEDS.isTagged(block.getType())) {
+            wouldExplode = !block.getWorld().isBedWorks();
+        } else if (block.getBlockData() instanceof RespawnAnchor anchor
+                && !block.getWorld().isRespawnAnchorWorks() && anchor.getCharges() > 0) {
+            boolean roomForCharge = anchor.getCharges() < anchor.getMaximumCharges();
+            boolean chargingThisHand = event.getMaterial() == Material.GLOWSTONE && roomForCharge;
+            // Vanilla lets the off hand charge when the main hand has no glowstone.
+            boolean chargingOffHand = event.getHand() == EquipmentSlot.HAND && roomForCharge
+                    && player.getInventory().getItemInOffHand().getType() == Material.GLOWSTONE;
+            wouldExplode = !chargingThisHand && !chargingOffHand;
+        }
+
+        if (wouldExplode) {
+            // Stop before vanilla removes the block. Deny item use too so the
+            // blocked click cannot accidentally place or consume a held item.
+            event.setUseInteractedBlock(Event.Result.DENY);
+            event.setUseItemInHand(Event.Result.DENY);
+        }
+    }
+
+    @EventHandler // Keep explosion cancellation as a fallback for other triggers.
     public void onBedOrAnchorExplosion(BlockExplodeEvent event) {
         if (pluginConfig.isCrystalPvpEnabled()) {
             return;
