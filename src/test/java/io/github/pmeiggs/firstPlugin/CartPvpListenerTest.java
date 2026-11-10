@@ -1,13 +1,11 @@
 package io.github.pmeiggs.firstPlugin;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.MockBukkit;
@@ -29,17 +27,24 @@ public class CartPvpListenerTest {
         MockBukkit.unmock();
     }
 
-//    @Test
-//    void CartDamageIsCappedAtTwentyHealthPoints() {
-//        Assertions.assertNotNull(MockBukkit.getMock());
-//        Entity cart = MockBukkit.getMock().entitybuilder().type(EntityType.MINECART).build();
-//        Player victim = MockBukkit.getMock().addPlayer();
-//        attacker.getInventory().setItemInMainHand(new ItemStack(Material.MACE));
-//        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
-//                attacker, victim, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 24);
-//
-//        plugin.getServer().getPluginManager().callEvent(event);
-//
-//        assertEquals(16, event.getFinalDamage(), 0.001);
-//    }
+    @Test
+    void CartDamageIsCappedAtTwentyHealthPoints() {
+        Player victim = MockBukkit.getMock().addPlayer();
+
+        Entity tntMinecart = victim.getWorld().spawnEntity(
+                victim.getLocation(),
+                EntityType.TNT_MINECART
+        );
+
+        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(
+                tntMinecart,
+                victim,
+                EntityDamageEvent.DamageCause.ENTITY_EXPLOSION,
+                24.0
+        );
+
+        plugin.getServer().getPluginManager().callEvent(event);
+
+        assertEquals(20.0, event.getDamage(), 0.001);
+    }
 }
