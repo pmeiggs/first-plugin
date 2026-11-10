@@ -57,6 +57,9 @@ public class FirstPlugin extends JavaPlugin {
         loadCustomEnchants();
         //register maceblocker listener#
         getServer().getPluginManager().registerEvents(new MaceEnchantListener(), this);
+        //register cartpvp listener
+        getServer().getPluginManager().registerEvents(new CartPvpListener(), this);
+
         //recipes
         loadRecipes();
 
