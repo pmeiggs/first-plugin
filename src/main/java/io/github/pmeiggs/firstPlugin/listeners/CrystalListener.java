@@ -101,6 +101,10 @@ public class CrystalListener implements Listener {
             // blocked click cannot accidentally place or consume a held item.
             event.setUseInteractedBlock(Event.Result.DENY);
             event.setUseItemInHand(Event.Result.DENY);
+            event.getPlayer().sendMessage(Component.text(
+                            "Bed and Respawn Anchor explosions are disabled. You can still use them as intended.")
+                    .color(NamedTextColor.RED)
+                    .decorate(TextDecoration.BOLD));
         }
     }
 
