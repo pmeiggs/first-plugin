@@ -9,9 +9,9 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:26.3.build.+")
+    compileOnly("io.papermc.paper:paper-api:26.3.build.237-stable")
     testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v26.3:4.119.0")
-    testImplementation("io.papermc.paper:paper-api:26.3.build.+")
+    testImplementation("io.papermc.paper:paper-api:26.3.build.237-stable")
     testImplementation("org.junit.jupiter:junit-jupiter:5.12.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
