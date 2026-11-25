@@ -175,8 +175,11 @@ public class CombatListener implements Listener {
     // Block restricted potion effects during combat/gameplay
     @EventHandler
     public void onPotionDrink(EntityPotionEffectEvent event) {
-        if (event.getEntity() instanceof Player) {
+        if (event.getEntity() instanceof Player player) {
             PotionEffectType type = event.getModifiedType();
+            if(pvpToggle.isPvpDisabled(player)) {
+                return;
+            }
             if (type != null && (type.equals(PotionEffectType.POISON) ||
                     type.equals(PotionEffectType.WEAKNESS) ||
                     type.equals(PotionEffectType.SLOWNESS) ||

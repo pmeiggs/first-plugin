@@ -1,0 +1,19 @@
+{
+  "given_item_modifier": [
+    {
+      "type": "minecraft:set_enchantments",
+      "enchantments": {
+        "minecraft:protection": 2
+      }
+    }
+  ],
+  "gives": {
+    "id": "minecraft:iron_helmet"
+  },
+  "max_uses": 12,
+  "wants": {
+    "count": 9,
+    "id": "minecraft:emerald"
+  },
+  "xp": 15
+}
