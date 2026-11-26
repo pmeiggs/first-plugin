@@ -30,7 +30,7 @@ public class FirstPlugin extends JavaPlugin {
         PvpToggle pvpToggle = new PvpToggle(this, combatTagTracker);
         getServer().getPluginManager().registerEvents(new CombatListener(this, pvpToggle, combatTagTracker), this);
         getServer().getPluginManager().registerEvents(new WorldNerfListener(), this);
-        getServer().getPluginManager().registerEvents(new ConnectionListener(pluginConfig), this);
+        getServer().getPluginManager().registerEvents(new ConnectionListener(pluginConfig, pvpToggle), this);
 
        
         getServer().getPluginManager().registerEvents(new DroppedItemsListener(this, pvpToggle), this);
