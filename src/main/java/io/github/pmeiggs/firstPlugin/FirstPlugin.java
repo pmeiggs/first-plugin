@@ -37,6 +37,7 @@ public class FirstPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new CrystalListener(pluginConfig), this);
         getServer().getPluginManager().registerEvents(new NetheriteListener(pluginConfig), this);
         getServer().getPluginManager().registerEvents(new VillagerTradeLockListener(this), this);
+        getServer().getPluginManager().registerEvents(new VillagerBreedingListener(this), this);
         getServer().getPluginManager().registerEvents(new LibrarianBookPriceListener(pluginConfig), this);
         getServer().getPluginManager().registerEvents(new EnchantmentCapListener(pluginConfig), this);
 
