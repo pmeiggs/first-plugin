@@ -10,7 +10,7 @@
   "gives": {
     "id": "minecraft:iron_chestplate"
   },
-  "max_uses": 12,
+  "max_uses": 6,
   "wants": {
     "count": {
       "type": "minecraft:uniform",

@@ -10,7 +10,7 @@
   "gives": {
     "id": "minecraft:iron_boots"
   },
-  "max_uses": 3,
+  "max_uses": 6,
   "wants": {
     "count": {
       "type": "minecraft:uniform",
