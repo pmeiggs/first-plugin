@@ -1,6 +1,6 @@
-package io.github.pmeiggs.firstPlugin;
+package io.github.pmeiggs.firstPlugin.listeners;
 
-import io.github.pmeiggs.firstPlugin.listeners.CombatListener;
+import io.github.pmeiggs.firstPlugin.FirstPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
@@ -12,7 +12,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;

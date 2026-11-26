@@ -14,8 +14,8 @@
   "wants": {
     "count": {
       "type": "minecraft:uniform",
-      "min": 18,
-      "max": 33
+      "min": 14,
+      "max": 23
     },
     "id": "minecraft:emerald"
   },

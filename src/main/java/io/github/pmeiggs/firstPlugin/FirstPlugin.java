@@ -33,7 +33,7 @@ public class FirstPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ConnectionListener(pluginConfig), this);
 
        
-
+        getServer().getPluginManager().registerEvents(new DroppedItemsListener(this, pvpToggle), this);
         getServer().getPluginManager().registerEvents(new CrystalListener(pluginConfig), this);
         getServer().getPluginManager().registerEvents(new NetheriteListener(pluginConfig), this);
         getServer().getPluginManager().registerEvents(new VillagerTradeLockListener(this), this);
