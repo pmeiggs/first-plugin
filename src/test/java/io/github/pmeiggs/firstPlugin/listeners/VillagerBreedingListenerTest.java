@@ -1,5 +1,6 @@
-package io.github.pmeiggs.firstPlugin;
+package io.github.pmeiggs.firstPlugin.listeners;
 
+import io.github.pmeiggs.firstPlugin.FirstPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

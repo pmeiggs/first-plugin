@@ -1,6 +1,6 @@
-package io.github.pmeiggs.firstPlugin;
+package io.github.pmeiggs.firstPlugin.listeners;
 
-import io.github.pmeiggs.firstPlugin.listeners.EnchantmentCapListener;
+import io.github.pmeiggs.firstPlugin.FirstPlugin;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
@@ -12,8 +12,6 @@ import org.bukkit.event.entity.VillagerAcquireTradeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
-import org.bukkit.inventory.AnvilInventory;
-import org.bukkit.inventory.EnchantingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;

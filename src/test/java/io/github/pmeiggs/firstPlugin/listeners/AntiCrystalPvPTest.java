@@ -1,8 +1,9 @@
-package io.github.pmeiggs.firstPlugin;
+package io.github.pmeiggs.firstPlugin.listeners;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.pmeiggs.firstPlugin.FirstPlugin;
 import org.bukkit.ExplosionResult;
 import org.bukkit.Location;
 import org.bukkit.Material;

@@ -10,9 +10,13 @@
   "gives": {
     "id": "minecraft:iron_helmet"
   },
-  "max_uses": 12,
+  "max_uses": 6,
   "wants": {
-    "count": 9,
+    "count": {
+      "type": "minecraft:uniform",
+      "min": 14,
+      "max": 23
+    },
     "id": "minecraft:emerald"
   },
   "xp": 15
