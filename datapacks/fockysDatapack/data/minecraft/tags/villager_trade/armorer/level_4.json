@@ -1,6 +1,13 @@
 {
   "replace": true,
   "values": [
-    "#minecraft:common_smith/level_4"
+    "fockysdatapack:armorer/iron_set/boots_protection_1",
+    "fockysdatapack:armorer/iron_set/boots_protection_2",
+    "fockysdatapack:armorer/iron_set/chestplate_protection_1",
+    "fockysdatapack:armorer/iron_set/chestplate_protection_2",
+    "fockysdatapack:armorer/iron_set/helmet_protection_1",
+    "fockysdatapack:armorer/iron_set/helmet_protection_2",
+    "fockysdatapack:armorer/iron_set/leggings_protection_1",
+    "fockysdatapack:armorer/iron_set/leggings_protection_2"
   ]
 }

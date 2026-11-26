@@ -78,6 +78,7 @@ public class PvpToggle implements BasicCommand {
         player.sendMessage(Component.text(nowDisabled ? "PvP is now off." : "PvP is now on.")
                 .color(NamedTextColor.GRAY)
                 .decorate(TextDecoration.BOLD));
+        updatePlayerListName(player);
     }
     //fortmat tikme remainiong on cd to send in playuer msg
     private String formatRemaining(long remainingMs) {
@@ -114,6 +115,12 @@ public class PvpToggle implements BasicCommand {
 
         target.getPersistentDataContainer().remove(lastToggleKey);
         source.getSender().sendMessage(Component.text("Reset the PvP toggle cooldown for " + target.getName() + "."));
+    }
+    public void updatePlayerListName(Player player) {
+        boolean pvpOn = !isPvpDisabled(player);
+
+        NamedTextColor color = pvpOn ? NamedTextColor.RED : NamedTextColor.WHITE;
+        player.playerListName(Component.text(player.getName(), color));
     }
 
 }

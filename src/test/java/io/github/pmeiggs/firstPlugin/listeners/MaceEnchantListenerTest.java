@@ -1,6 +1,6 @@
-package io.github.pmeiggs.firstPlugin;
+package io.github.pmeiggs.firstPlugin.listeners;
 
-import io.github.pmeiggs.firstPlugin.listeners.MaceEnchantListener;
+import io.github.pmeiggs.firstPlugin.FirstPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
