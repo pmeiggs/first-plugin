@@ -2,6 +2,7 @@ package io.github.pmeiggs.firstPlugin.listeners;
 
 import io.github.pmeiggs.firstPlugin.commands.PvpToggle;
 import io.github.pmeiggs.firstPlugin.combat.CombatTagTracker;
+import io.papermc.paper.event.entity.EntityLungeEvent;
 import org.bukkit.Material;
 import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
@@ -10,6 +11,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
@@ -21,6 +23,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class CombatListener implements Listener {
@@ -31,6 +34,7 @@ public class CombatListener implements Listener {
     private final JavaPlugin plugin;
     private final PvpToggle pvpToggle;
     private final CombatTagTracker combatTagTracker;
+    private final Map<UUID, Long> lungeCooldownUntil = new HashMap<>();
 
     public CombatListener(JavaPlugin plugin, PvpToggle pvpToggle) {
         this(plugin, pvpToggle, new CombatTagTracker());
@@ -224,6 +228,33 @@ public class CombatListener implements Listener {
         if (event.getEntity().getItemStack().getType() == Material.MACE) {
             event.setCancelled(true);
         }
+    }
+    @EventHandler
+    public void onLunge(EntityLungeEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+        if (pvpToggle.isPvpDisabled(player)) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        long cooldownMs = plugin.getConfig().getLong("lungeCooldownMs");
+        UUID playerId = player.getUniqueId();
+
+        Long cooldownUntil = lungeCooldownUntil.get(playerId); //get from map, if null then no cooldown
+
+        if (cooldownUntil != null && now < cooldownUntil) {
+            event.setCancelled(true);
+            return; //return early if still in cooldown
+        }
+
+        lungeCooldownUntil.put(playerId, now + cooldownMs); //put in hashmap for cooldown tracking
+
+        ItemStack spear = player.getInventory().getItemInMainHand(); //itemstack spear
+        int cooldownTicks = (int) (cooldownMs / 1000 * 20);//conver ms to ticks from cooldown
+
+        player.setCooldown(spear, cooldownTicks); //set visual cooldown for the player
     }
 
     //new method to verify if combat tagged

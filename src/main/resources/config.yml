@@ -4,6 +4,7 @@ pvpEnabled: true
 combatCooldownMs: 15000
 crystalPvpEnabled: false
 netheriteSmithingEnabled: false
+lungeCooldownMs: 30000
 
 villager-trades:
   enchanted-book-price-multiplier: 1.5
