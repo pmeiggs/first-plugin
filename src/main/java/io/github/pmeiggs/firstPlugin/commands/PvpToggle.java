@@ -11,6 +11,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.eclipse.sisu.Nullable;
 
 public class PvpToggle implements BasicCommand {
     private static final long TOGGLE_COOLDOWN_MS = 5L * 24 * 60 * 60 * 1000;
@@ -75,10 +76,19 @@ public class PvpToggle implements BasicCommand {
         }
         player.getPersistentDataContainer().set(lastToggleKey, PersistentDataType.LONG, now);
         //send msg as feedback for when pvp is on or off
-        player.sendMessage(Component.text(nowDisabled ? "PvP is now off." : "PvP is now on.")
+        player.sendMessage(Component.text(nowDisabled ? "PvP is now off. You can now claim land." : "PvP is now on. All your claims have been removed.")
                 .color(NamedTextColor.GRAY)
                 .decorate(TextDecoration.BOLD));
         updatePlayerListName(player);
+
+        if (!nowDisabled) {
+            String removeClamsCommand = "sz removeall " + player.getName() + " confirm"; //this is the command for the plugin we're gonna use
+
+            Bukkit.dispatchCommand(
+                    Bukkit.getConsoleSender(),
+                    removeClamsCommand
+            );
+        }
     }
     //fortmat tikme remainiong on cd to send in playuer msg
     private String formatRemaining(long remainingMs) {
@@ -122,5 +132,4 @@ public class PvpToggle implements BasicCommand {
         NamedTextColor color = pvpOn ? NamedTextColor.RED : NamedTextColor.WHITE;
         player.playerListName(Component.text(player.getName(), color));
     }
-
 }

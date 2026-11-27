@@ -60,7 +60,7 @@ public class FirstPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new MaceEnchantListener(), this);
         //register cartpvp listener
         getServer().getPluginManager().registerEvents(new CartPvpListener(), this);
-
+        getServer().getPluginManager().registerEvents(new CommandListener(pvpToggle), this);
         //recipes
         loadRecipes();
 

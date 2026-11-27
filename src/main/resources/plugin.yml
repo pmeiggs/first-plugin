@@ -5,3 +5,10 @@ main: io.github.pmeiggs.firstPlugin.FirstPlugin
 api-version: '26.3'
 load: POSTWORLD
 description: "Test plugin for events in the server. Will likely handle other separate events too."
+permissions:
+  firstplugin.heal:
+    description: Allows the player to heal themselves to max everything.
+    default: op
+  firstplugin.gamemode:
+    description: Changes the gamemode of the player.
+    default: op

@@ -11,6 +11,9 @@ import org.bukkit.entity.Player;
 public class GamemodeCommands {
     public static LiteralCommandNode<CommandSourceStack> create(){
         return Commands.literal("gm")
+                .requires(commandSourceStack -> {
+                    return commandSourceStack.getSender().hasPermission("firstplugin.gamemode");
+                })
                 .then(Commands.literal("s").
                         executes(context -> gamemodeChange(context.getSource(), GameMode.SURVIVAL)))
                 .then(Commands.literal("c").
@@ -30,5 +33,4 @@ public class GamemodeCommands {
         player.setGameMode(gameMode);
         return Command.SINGLE_SUCCESS;
     }
-
 }

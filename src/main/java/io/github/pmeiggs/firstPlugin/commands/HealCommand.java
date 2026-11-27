@@ -18,4 +18,8 @@ public class HealCommand implements BasicCommand {
         player.sendMessage(Component.text("You've been healed.")
                 .color(NamedTextColor.GREEN));
     }
+    @Override
+    public String permission() {
+        return "firstplugin.heal";
+    }
 }
