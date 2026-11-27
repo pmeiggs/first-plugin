@@ -1,6 +1,7 @@
 package io.github.pmeiggs.firstPlugin.listeners;
 
 import io.github.pmeiggs.firstPlugin.FirstPlugin;
+import io.papermc.paper.event.entity.EntityLungeEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
@@ -314,5 +315,16 @@ class CombatListenerTest {
         plugin.getServer().getPluginManager().callEvent(event);
 
         assertEquals(24, event.getFinalDamage(), 0.001);
+    }
+    @Test
+    void lungeCooldownPreventsLunge() {
+        Player player = MockBukkit.getMock().addPlayer();
+
+        EntityLungeEvent lungeEvent = new EntityLungeEvent(player, 2);
+        EntityLungeEvent lungeEvent2 = new EntityLungeEvent(player, 2);
+        plugin.getServer().getPluginManager().callEvent(lungeEvent);
+        plugin.getServer().getPluginManager().callEvent(lungeEvent2);
+
+        assertTrue(lungeEvent2.isCancelled());
     }
 }
